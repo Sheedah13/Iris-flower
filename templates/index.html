@@ -2,46 +2,255 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Iris Prediction</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iris Botanical Classifier</title>
+  
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-indigo: #4f46e5;
+      --accent-purple: #7c3aed;
+      --bg-gradient: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 50%, #f0fdf4 100%);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 2rem 0;
+      color: #1e293b;
+    }
+
+    .serif-title {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .main-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(30, 41, 59, 0.08);
+      overflow: hidden;
+    }
+
+    .header-banner {
+      background: linear-gradient(120deg, #4338ca, #6d28d9);
+      color: white;
+      padding: 2rem;
+    }
+
+    .form-control {
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary-indigo);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+    }
+
+    .input-group-text {
+      border-radius: 0 12px 12px 0;
+      background-color: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-left: none;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .form-control.with-unit {
+      border-right: none;
+    }
+
+    .preset-btn {
+      font-size: 0.8rem;
+      border-radius: 20px;
+      padding: 0.35rem 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .btn-predict {
+      background: linear-gradient(120deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 12px;
+      padding: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-predict:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+    }
+
+    .result-card {
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .species-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-  <div class="container mt-5">
-    <div class="card shadow p-4">
-      <h2 class="mb-4 text-primary">Iris Species Predictor</h2>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        <div class="main-card">
+          
+          <!-- Header -->
+          <div class="header-banner text-center">
+            <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-2 fw-semibold">
+              <i class="bi bi-flower1 me-1"></i> Botanical Machine Learning
+            </span>
+            <h1 class="serif-title mb-1">Iris Species Classifier</h1>
+            <p class="mb-0 opacity-75 small">Enter sepal and petal dimensions in centimeters to identify the Iris variety</p>
+          </div>
 
-      <form action="/predict" method="POST">
-        <div class="mb-3">
-          <label for="sepal_length" class="form-label">Sepal Length</label>
-          <input type="number" step="any" class="form-control" name="sepal_length" required>
+          <div class="p-4 p-md-5">
+            <!-- Quick Sample Presets -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 pb-3 border-bottom">
+              <span class="text-muted small fw-medium"><i class="bi bi-magic me-1"></i>Try sample measurements:</span>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-primary preset-btn" onclick="fillSample(5.1, 3.5, 1.4, 0.2)">Setosa</button>
+                <button type="button" class="btn btn-outline-primary preset-btn" onclick="fillSample(6.0, 2.7, 4.2, 1.3)">Versicolor</button>
+                <button type="button" class="btn btn-outline-primary preset-btn" onclick="fillSample(6.7, 3.1, 5.6, 2.4)">Virginica</button>
+              </div>
+            </div>
+
+            <!-- Prediction Form -->
+            <form action="/predict" method="POST">
+              <div class="row g-3">
+                <!-- Sepal Section -->
+                <div class="col-md-6">
+                  <label for="sepal_length" class="form-label fw-semibold small text-secondary">Sepal Length</label>
+                  <div class="input-group">
+                    <input type="number" step="any" min="0" id="sepal_length" class="form-control with-unit" name="sepal_length" value="{{ request.form.sepal_length }}" placeholder="e.g., 5.1" required>
+                    <span class="input-group-text">cm</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="sepal_width" class="form-label fw-semibold small text-secondary">Sepal Width</label>
+                  <div class="input-group">
+                    <input type="number" step="any" min="0" id="sepal_width" class="form-control with-unit" name="sepal_width" value="{{ request.form.sepal_width }}" placeholder="e.g., 3.5" required>
+                    <span class="input-group-text">cm</span>
+                  </div>
+                </div>
+
+                <!-- Petal Section -->
+                <div class="col-md-6">
+                  <label for="petal_length" class="form-label fw-semibold small text-secondary">Petal Length</label>
+                  <div class="input-group">
+                    <input type="number" step="any" min="0" id="petal_length" class="form-control with-unit" name="petal_length" value="{{ request.form.petal_length }}" placeholder="e.g., 1.4" required>
+                    <span class="input-group-text">cm</span>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="petal_width" class="form-label fw-semibold small text-secondary">Petal Width</label>
+                  <div class="input-group">
+                    <input type="number" step="any" min="0" id="petal_width" class="form-control with-unit" name="petal_width" value="{{ request.form.petal_width }}" placeholder="e.g., 0.2" required>
+                    <span class="input-group-text">cm</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-predict flex-grow-1">
+                  <i class="bi bi-search me-2"></i>Identify Species
+                </button>
+                <a href="/" class="btn btn-light border rounded-3 px-3 d-flex align-items-center text-muted" title="Reset Form">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+              </div>
+            </form>
+
+            <!-- Dynamic Result Section -->
+            {% if pred %}
+            {% set species = pred | lower %}
+            <div class="result-card p-4 mt-4">
+              <div class="row align-items-center g-4">
+                
+                <!-- Species Photo -->
+                <div class="col-md-5">
+                  {% if 'setosa' in species %}
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/56/Kosaciec_szczecinkowaty_Iris_setosa.jpg" alt="Iris Setosa" class="species-img shadow-sm">
+                  {% elif 'versicolor' in species %}
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Iris_versicolor_3.jpg" alt="Iris Versicolor" class="species-img shadow-sm">
+                  {% elif 'virginica' in species %}
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Iris_virginica.jpg" alt="Iris Virginica" class="species-img shadow-sm">
+                  {% else %}
+                    <div class="species-img bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary">
+                      <i class="bi bi-flower2 display-1"></i>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Species Details -->
+                <div class="col-md-7">
+                  <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill mb-2">
+                    <i class="bi bi-check-circle-fill me-1"></i> Match Found
+                  </span>
+                  <h3 class="serif-title text-dark mb-2 text-capitalize">{{ pred }}</h3>
+                  
+                  {% if 'setosa' in species %}
+                    <p class="text-muted small mb-2"><strong>Common Name:</strong> Bristle-pointed Iris</p>
+                    <p class="text-secondary small mb-0">Easily distinguished by its very small petals and wide, sturdy sepals. Native to North America and East Asia.</p>
+                  {% elif 'versicolor' in species %}
+                    <p class="text-muted small mb-2"><strong>Common Name:</strong> Harlequin Blueflag</p>
+                    <p class="text-secondary small mb-0">Features medium-sized petals and sepals with rich violet-blue coloring and yellow-white markings near the base.</p>
+                  {% elif 'virginica' in species %}
+                    <p class="text-muted small mb-2"><strong>Common Name:</strong> Virginia Iris</p>
+                    <p class="text-secondary small mb-0">The largest of the three classic species, characterized by long, broad petals and vibrant violet-blue blooms.</p>
+                  {% else %}
+                    <p class="text-secondary small mb-0">Classification completed based on your provided sepal and petal measurements.</p>
+                  {% endif %}
+                </div>
+
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
         </div>
-
-        <div class="mb-3">
-          <label for="sepal_width" class="form-label">Sepal Width</label>
-          <input type="number" step="any" class="form-control" name="sepal_width" required>
-        </div>
-
-        <div class="mb-3">
-          <label for="petal_length" class="form-label">Petal Length</label>
-          <input type="number" step="any" class="form-control" name="petal_length" required>
-        </div>
-
-        <div class="mb-3">
-          <label for="petal_width" class="form-label">Petal Width</label>
-          <input type="number" step="any" class="form-control" name="petal_width" required>
-        </div>
-
-        <button type="submit" class="btn btn-success">Predict</button>
-      </form>
-
-      {% if pred %}
-      <div class="alert alert-info mt-4">
-        <h4>The Iris species of the flower is: <strong>{{ pred }}</strong></h4>
       </div>
-      {% endif %}
     </div>
   </div>
+
+  <!-- Script for Sample Presets -->
+  <script>
+    function fillSample(sl, sw, pl, pw) {
+      document.getElementById('sepal_length').value = sl;
+      document.getElementById('sepal_width').value = sw;
+      document.getElementById('petal_length').value = pl;
+      document.getElementById('petal_width').value = pw;
+    }
+  </script>
 
 </body>
 </html>
